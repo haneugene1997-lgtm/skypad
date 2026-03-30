@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens ─────────────────────────────────── */
+:root {
+  --bg:        #0a0e1a;
+  --surface:   #111827;
+  --surface2:  #1a2235;
+  --glass:     rgba(255, 255, 255, 0.06);
+  --glass2:    rgba(255, 255, 255, 0.10);
+  --border:    rgba(255, 255, 255, 0.08);
+  --border2:   rgba(255, 255, 255, 0.15);
+  --text:      #f0f4ff;
+  --muted:     #7a8aaa;
+  --blue:      #4f8ef7;
+  --teal:      #3ecfb2;
+  --amber:     #f4b942;
+  --purple:    #7c5cfc;
+  --red:       #e05c5c;
+}
+
+/* ── Base ───────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  /* Full-height layout for mobile PWA */
+  height: 100%;
+  overflow: hidden;
+}
+
+#__next {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Scrollbars ─────────────────────────────────────── */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Utilities ──────────────────────────────────────── */
+@layer utilities {
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--border);
+  }
+
+  .glass-strong {
+    background: var(--glass2);
+    border: 1px solid var(--border2);
+  }
+
+  .text-muted {
+    color: var(--muted);
+  }
+
+  .surface {
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  /* Pill / badge variants */
+  .pill-blue   { background: rgba(79,142,247,0.12); color: var(--blue); }
+  .pill-teal   { background: rgba(62,207,178,0.12); color: var(--teal); }
+  .pill-amber  { background: rgba(244,185,66,0.12); color: var(--amber); }
+  .pill-purple { background: rgba(124,92,252,0.12); color: var(--purple); }
+  .pill-red    { background: rgba(224,92,92,0.12);  color: var(--red); }
+
+  /* Module icon backgrounds */
+  .icon-bg-purple { background: rgba(124,92,252,0.15); }
+  .icon-bg-teal   { background: rgba(62,207,178,0.15); }
+  .icon-bg-amber  { background: rgba(244,185,66,0.15); }
+  .icon-bg-blue   { background: rgba(79,142,247,0.15); }
+}
+
+/* ── Animations ─────────────────────────────────────── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+.animate-slide-in  { animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+.animate-fade-up   { animation: fadeUp  0.3s  cubic-bezier(0.4, 0, 0.2, 1); }
+.animate-blink     { animation: blink   2s    ease-in-out infinite; }
+
+/* ── PWA safe-area insets ───────────────────────────── */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+.pt-safe { padding-top:    env(safe-area-inset-top,    0px);  }
