@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -29,20 +27,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-html,
+html {
+  height: 100%;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  /* Full-height layout for mobile PWA */
-  height: 100%;
-  overflow: hidden;
+  margin: 0;
 }
 
-#__next {
+/* App Router has no #__next; full-height shell for PWA-style layouts */
+#app-root {
+  flex: 1;
+  min-height: 0;
   height: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
 /* ── Scrollbars ─────────────────────────────────────── */

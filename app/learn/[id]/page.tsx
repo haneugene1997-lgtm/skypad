@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getDeck, getCardsByDeck, reviewCard, Deck, Flashcard } from "@/lib/db";
 import clsx from "clsx";
+import { useI18n } from "@/hooks/useI18n";
 
 type Rating = 0 | 1 | 2;
 
 export default function DeckPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useI18n();
 
   const [deck, setDeck] = useState<Deck | null>(null);
   const [cards, setCards] = useState<Flashcard[]>([]);
@@ -19,11 +21,28 @@ export default function DeckPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getDeck(id), getCardsByDeck(id)]).then(([d, c]) => {
-      setDeck(d ?? null);
-      setCards(c);
-      setLoading(false);
-    });
+    let cancelled = false;
+    setLoading(true);
+    Promise.all([getDeck(id), getCardsByDeck(id)])
+      .then(([d, c]) => {
+        if (!cancelled) {
+          setDeck(d ?? null);
+          setCards(c);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!cancelled) {
+          setDeck(null);
+          setCards([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   const card = cards[index];
@@ -46,7 +65,53 @@ export default function DeckPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full bg-[var(--bg)]">
-        <p className="text-[var(--muted)] text-sm">Loading deck…</p>
+        <p className="text-[var(--muted)] text-sm">{t("loadingDeck")}</p>
+      </div>
+    );
+  }
+
+  if (!deck) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 h-full bg-[var(--bg)] px-8 text-center">
+        <p className="text-[var(--muted)] text-sm">{t("notFoundDeck")}</p>
+        <button
+          type="button"
+          onClick={() => router.push("/learn")}
+          className="text-[var(--blue)] text-[15px] font-medium active:opacity-70"
+        >
+          {t("flashcardDecks")} →
+        </button>
+      </div>
+    );
+  }
+
+  if (cards.length === 0) {
+    return (
+      <div className="flex flex-col h-full bg-[var(--bg)]">
+        <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 pr-[4.5rem]">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex items-center gap-1 text-[var(--blue)] text-[15px] active:opacity-70"
+          >
+            <svg viewBox="0 0 10 16" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-2.5 h-4">
+              <path d="M9 1L1 8l8 7" />
+            </svg>
+            {t("decksNav")}
+          </button>
+          <span className="text-[17px] font-semibold truncate max-w-[40%] text-center">{deck.title}</span>
+          <span className="w-10" aria-hidden />
+        </div>
+        <div className="flex flex-col items-center justify-center flex-1 gap-3 px-8 text-center">
+          <p className="text-[var(--muted)] text-sm">{t("deckEmpty")}</p>
+          <button
+            type="button"
+            onClick={() => router.push("/learn")}
+            className="text-[var(--blue)] text-[15px] font-medium active:opacity-70"
+          >
+            {t("backToList")}
+          </button>
+        </div>
       </div>
     );
   }
@@ -54,7 +119,7 @@ export default function DeckPage() {
   return (
     <div className="flex flex-col h-full bg-[var(--bg)]">
       {/* Nav */}
-      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 pr-[4.5rem]">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-1 text-[var(--blue)] text-[15px] active:opacity-70"
@@ -62,14 +127,16 @@ export default function DeckPage() {
           <svg viewBox="0 0 10 16" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-2.5 h-4">
             <path d="M9 1L1 8l8 7" />
           </svg>
-          Decks
+          {t("decksNav")}
         </button>
-        <span className="text-[17px] font-semibold">{deck?.title ?? "Review"}</span>
+        <span className="text-[17px] font-semibold truncate max-w-[40%] text-center">
+          {deck?.title ?? t("review")}
+        </span>
         <button
           onClick={() => router.back()}
-          className="text-[var(--blue)] text-[15px] active:opacity-70"
+          className="text-[var(--blue)] text-[15px] active:opacity-70 shrink-0"
         >
-          Done
+          {t("done")}
         </button>
       </div>
 
@@ -80,8 +147,12 @@ export default function DeckPage() {
           {/* Progress */}
           <div className="w-full">
             <div className="flex justify-between text-xs text-[var(--muted)] mb-2">
-              <span>Card {index + 1} of {cards.length}</span>
-              <span>{Math.round(((index) / cards.length) * 100)}% done</span>
+              <span>{t("cardOf", { n: index + 1, total: cards.length })}</span>
+              <span>
+                {t("percentDone", {
+                  pct: Math.round((index / cards.length) * 100),
+                })}
+              </span>
             </div>
             <div className="h-1 rounded-full w-full" style={{ background: "var(--border)" }}>
               <div
@@ -108,7 +179,7 @@ export default function DeckPage() {
             {!flipped ? (
               <>
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--muted)] mb-5">
-                  Korean
+                  {t("labelKorean")}
                 </p>
                 <p className="text-5xl font-bold tracking-tight text-center">
                   {card?.front}
@@ -116,12 +187,12 @@ export default function DeckPage() {
                 {card?.reading && (
                   <p className="text-sm text-[var(--muted)] mt-2 font-mono">{card.reading}</p>
                 )}
-                <p className="text-xs text-[var(--muted)] mt-6">tap to reveal →</p>
+                <p className="text-xs text-[var(--muted)] mt-6">{t("tapToReveal")}</p>
               </>
             ) : (
               <>
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--teal)] mb-5 opacity-70">
-                  English
+                  {t("labelEnglish")}
                 </p>
                 <p className="text-2xl font-semibold text-center text-[var(--teal)]">
                   {card?.back}
@@ -143,12 +214,12 @@ export default function DeckPage() {
             )}
           >
             {([
-              { label: "Again", sub: "<1m",  rating: 0, color: "var(--red)",    borderColor: "rgba(224,92,92,0.3)"   },
-              { label: "Good",  sub: "4d",   rating: 1, color: "var(--blue)",   borderColor: "rgba(79,142,247,0.3)"  },
-              { label: "Easy",  sub: "7d",   rating: 2, color: "var(--teal)",   borderColor: "rgba(62,207,178,0.3)"  },
-            ] as { label: string; sub: string; rating: Rating; color: string; borderColor: string }[]).map((btn) => (
+              { labelKey: "again" as const, sub: "<1m", rating: 0, color: "var(--red)", borderColor: "rgba(224,92,92,0.3)" },
+              { labelKey: "good" as const, sub: "4d", rating: 1, color: "var(--blue)", borderColor: "rgba(79,142,247,0.3)" },
+              { labelKey: "easy" as const, sub: "7d", rating: 2, color: "var(--teal)", borderColor: "rgba(62,207,178,0.3)" },
+            ] as const).map((btn) => (
               <button
-                key={btn.label}
+                key={btn.labelKey}
                 onClick={() => handleRate(btn.rating)}
                 className="flex-1 py-4 rounded-2xl flex flex-col items-center gap-1 transition-opacity active:opacity-70"
                 style={{
@@ -159,7 +230,7 @@ export default function DeckPage() {
                 <span className="text-lg" style={{ color: btn.color }}>
                   {btn.rating === 0 ? "↩" : btn.rating === 1 ? "✓" : "⚡"}
                 </span>
-                <span className="text-sm font-medium">{btn.label}</span>
+                <span className="text-sm font-medium">{t(btn.labelKey)}</span>
                 <span className="text-[11px] text-[var(--muted)]">{btn.sub}</span>
               </button>
             ))}
@@ -171,6 +242,7 @@ export default function DeckPage() {
 }
 
 function DoneScreen({ total, onBack }: { total: number; onBack: () => void }) {
+  const { t } = useI18n();
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-8 gap-6 animate-fade-up">
       <div
@@ -180,9 +252,9 @@ function DoneScreen({ total, onBack }: { total: number; onBack: () => void }) {
         🎉
       </div>
       <div className="text-center">
-        <h2 className="text-2xl font-bold tracking-tight mb-2">Session complete!</h2>
-        <p className="text-[var(--muted)] text-sm leading-relaxed">
-          You reviewed {total} cards.<br />Great work at 35,000 feet.
+        <h2 className="text-2xl font-bold tracking-tight mb-2">{t("sessionComplete")}</h2>
+        <p className="text-[var(--muted)] text-sm leading-relaxed whitespace-pre-line">
+          {t("sessionCompleteBody", { total })}
         </p>
       </div>
       <button
@@ -190,7 +262,7 @@ function DoneScreen({ total, onBack }: { total: number; onBack: () => void }) {
         className="px-8 py-3 rounded-2xl font-medium text-white active:opacity-70"
         style={{ background: "var(--teal)" }}
       >
-        Back to decks
+        {t("backToDecks")}
       </button>
     </div>
   );

@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { useI18n } from "@/hooks/useI18n";
 
-const tabs = [
+const tabDefs = [
   {
     href: "/",
-    label: "Home",
+    labelKey: "navHome" as const,
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
@@ -18,7 +19,7 @@ const tabs = [
   },
   {
     href: "/read",
-    label: "Read",
+    labelKey: "navRead" as const,
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
         <path d="M4 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"
@@ -30,7 +31,7 @@ const tabs = [
   },
   {
     href: "/learn",
-    label: "Learn",
+    labelKey: "navLearn" as const,
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
         <rect x="2" y="6" width="14" height="10" rx="2"
@@ -43,7 +44,7 @@ const tabs = [
   },
   {
     href: "/journal",
-    label: "Journal",
+    labelKey: "navJournal" as const,
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
         <path d="M12 20h9" />
@@ -56,6 +57,7 @@ const tabs = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { t } = useI18n();
 
   return (
     <nav
@@ -67,7 +69,7 @@ export function BottomNav() {
         paddingBottom: "max(env(safe-area-inset-bottom), 12px)",
       }}
     >
-      {tabs.map((tab) => {
+      {tabDefs.map((tab) => {
         const isActive =
           tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
 
@@ -81,7 +83,7 @@ export function BottomNav() {
             )}
           >
             {tab.icon(isActive)}
-            <span className="text-[10px] font-medium">{tab.label}</span>
+            <span className="text-[10px] font-medium">{t(tab.labelKey)}</span>
           </Link>
         );
       })}

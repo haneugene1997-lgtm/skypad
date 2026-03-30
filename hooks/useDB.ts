@@ -22,13 +22,13 @@ export function useDB<T>(
     setLoading(true);
     fetcher()
       .then((result) => {
-        if (!cancelled) {
-          setData(result);
-          setLoading(false);
-        }
+        if (!cancelled) setData(result);
       })
       .catch((err) => {
         console.error("useDB error:", err);
+        if (!cancelled) setData(null);
+      })
+      .finally(() => {
         if (!cancelled) setLoading(false);
       });
     return () => {

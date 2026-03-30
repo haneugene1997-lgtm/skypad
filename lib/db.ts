@@ -99,6 +99,8 @@ export async function getDB(): Promise<IDBPDatabase<SkyPadDB>> {
     },
   });
 
+  await seedIfEmptyWithDb(_db);
+
   return _db;
 }
 
@@ -208,8 +210,7 @@ export async function deleteJournalEntry(id: string): Promise<void> {
 
 // ── Seed data (dev / first-run) ──────────────────────
 
-export async function seedIfEmpty(): Promise<void> {
-  const db = await getDB();
+async function seedIfEmptyWithDb(db: IDBPDatabase<SkyPadDB>): Promise<void> {
   const existing = await db.count("articles");
   if (existing > 0) return;
 
@@ -314,4 +315,9 @@ export async function seedIfEmpty(): Promise<void> {
   for (const e of entries) {
     await db.put("journal", e);
   }
+}
+
+/** Await to ensure DB is open and sample data exists (no-op if already seeded). */
+export async function seedIfEmpty(): Promise<void> {
+  await getDB();
 }

@@ -5,6 +5,7 @@ import { useDB } from "@/hooks/useDB";
 import { getArticles, Article } from "@/lib/db";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { useI18n } from "@/hooks/useI18n";
 
 const TAG_COLORS: Record<string, { pill: string; bar: string }> = {
   Productivity: { pill: "pill-purple", bar: "var(--purple)" },
@@ -15,14 +16,15 @@ const TAG_COLORS: Record<string, { pill: string; bar: string }> = {
 
 export default function ReadPage() {
   const { data: articles, loading } = useDB(getArticles);
+  const { t } = useI18n();
 
   return (
     <div className="flex flex-col h-full bg-[var(--bg)]">
       <div className="flex-1 overflow-y-auto">
         {/* Header */}
         <div className="px-5 pt-5 pb-4">
-          <h1 className="text-3xl font-semibold tracking-tight">Reading List</h1>
-          <p className="text-sm text-[var(--muted)] mt-1">All articles saved offline</p>
+          <h1 className="text-3xl font-semibold tracking-tight">{t("readingList")}</h1>
+          <p className="text-sm text-[var(--muted)] mt-1">{t("readingListSub")}</p>
         </div>
 
         {/* Search bar */}
@@ -35,7 +37,7 @@ export default function ReadPage() {
             <circle cx="7" cy="7" r="5" /><path d="M11 11l3 3" />
           </svg>
           <input
-            placeholder="Search articles…"
+            placeholder={t("searchArticles")}
             className="flex-1 bg-transparent outline-none text-sm text-[var(--muted)] placeholder:text-[var(--muted)]"
           />
         </div>
@@ -43,7 +45,7 @@ export default function ReadPage() {
         {/* Article list */}
         <div className="px-5 flex flex-col gap-3 pb-6">
           {loading && (
-            <div className="text-[var(--muted)] text-sm text-center py-12">Loading…</div>
+            <div className="text-[var(--muted)] text-sm text-center py-12">{t("loading")}</div>
           )}
           {articles?.map((article) => (
             <ArticleCard key={article.id} article={article} />
@@ -55,7 +57,7 @@ export default function ReadPage() {
             className="flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-medium text-[var(--muted)] transition-opacity active:opacity-70"
             style={{ border: "1px dashed var(--border2)" }}
           >
-            <span className="text-lg">+</span> Save new article
+            <span className="text-lg">+</span> {t("saveNewArticle")}
           </Link>
         </div>
       </div>
@@ -66,6 +68,7 @@ export default function ReadPage() {
 }
 
 function ArticleCard({ article }: { article: Article }) {
+  const { t } = useI18n();
   const colors = TAG_COLORS[article.tag] ?? { pill: "pill-blue", bar: "var(--blue)" };
 
   return (
@@ -79,17 +82,19 @@ function ArticleCard({ article }: { article: Article }) {
       </span>
       <h3 className="text-[15px] font-medium leading-snug mb-2">{article.title}</h3>
       <div className="flex items-center gap-3 text-xs text-[var(--muted)] mb-3">
-        <span>{article.readingTimeMin} min read</span>
+        <span>{t("minReadLine", { n: article.readingTimeMin })}</span>
         <span>·</span>
         <span>{article.author}</span>
       </div>
       {article.progressPct > 0 ? (
         <div>
           <ProgressBar value={article.progressPct} color={colors.bar} />
-          <p className="text-[11px] text-[var(--muted)] mt-1">{article.progressPct}% complete</p>
+          <p className="text-[11px] text-[var(--muted)] mt-1">
+            {article.progressPct}% {t("percentComplete")}
+          </p>
         </div>
       ) : (
-        <p className="text-[11px] text-[var(--muted)]">Not started</p>
+        <p className="text-[11px] text-[var(--muted)]">{t("notStarted")}</p>
       )}
     </Link>
   );

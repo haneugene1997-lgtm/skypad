@@ -1,5 +1,21 @@
 import type { Metadata, Viewport } from "next";
+import { DM_Sans, Space_Mono } from "next/font/google";
 import "@/styles/globals.css";
+import AppShell from "@/components/ui/AppShell";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  display: "swap",
+  variable: "--font-dm-sans",
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-space-mono",
+});
 
 export const metadata: Metadata = {
   title: "SkyPad",
@@ -29,7 +45,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html
+      lang="ko"
+      className={`${dmSans.variable} ${spaceMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         {/* PWA iOS meta tags */}
         <meta name="mobile-web-app-capable" content="yes" />
@@ -37,8 +57,12 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
-      <body className="h-full overflow-hidden">
-        {children}
+      <body
+        className={`${dmSans.className} h-full min-h-[100dvh] overflow-hidden antialiased`}
+      >
+        <div id="app-root" className="flex h-full min-h-0 flex-col">
+          <AppShell>{children}</AppShell>
+        </div>
       </body>
     </html>
   );

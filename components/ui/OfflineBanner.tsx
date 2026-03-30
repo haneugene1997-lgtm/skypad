@@ -1,9 +1,11 @@
 "use client";
 
 import { useOffline } from "@/hooks/useOffline";
+import { useI18n } from "@/hooks/useI18n";
 
 export function OfflineBanner() {
   const isOffline = useOffline();
+  const { t } = useI18n();
 
   if (!isOffline) return null;
 
@@ -17,7 +19,7 @@ export function OfflineBanner() {
       }}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-[var(--amber)] animate-blink" />
-      Offline mode active
+      {t("offlineModeActive")}
     </div>
   );
 }

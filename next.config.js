@@ -57,6 +57,15 @@ const withPWA = require("next-pwa")({
 
 const nextConfig = {
   reactStrictMode: true,
+  // Dev-only: filesystem webpack cache can reference missing chunks after interrupted
+  // compiles (Internal Server Error / Cannot find module './NNN.js'). Disabling avoids that
+  // at the cost of slightly slower first compile per run.
+  webpack: (/** @type {import('webpack').Configuration} */ config, { dev }) => {
+    if (dev) {
+      config.cache = false;
+    }
+    return config;
+  },
 };
 
 module.exports = withPWA(nextConfig);

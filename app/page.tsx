@@ -1,21 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { useAppStore } from "@/lib/store";
-import { seedIfEmpty } from "@/lib/db";
 import { useOffline } from "@/hooks/useOffline";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { useI18n } from "@/hooks/useI18n";
 
 export default function HomePage() {
   const flight = useAppStore((s) => s.flight);
   const isOffline = useOffline();
-
-  useEffect(() => {
-    // Seed sample data on first run
-    seedIfEmpty().catch(console.error);
-  }, []);
+  const { t } = useI18n();
 
   const remainingH = Math.floor(flight.remainingMin / 60);
   const remainingM = flight.remainingMin % 60;
@@ -26,8 +21,8 @@ export default function HomePage() {
       <div className="flex-1 overflow-y-auto">
         {/* Header */}
         <div className="px-5 pt-5 pb-2">
-          <p className="text-sm text-[var(--muted)] mb-0.5">Good morning,</p>
-          <h1 className="text-3xl font-semibold tracking-tight">SkyPad ✈</h1>
+          <p className="text-sm text-[var(--muted)] mb-0.5">{t("greeting")}</p>
+          <h1 className="text-3xl font-semibold tracking-tight">{t("appTitle")}</h1>
         </div>
 
         {/* Flight card */}
@@ -58,7 +53,7 @@ export default function HomePage() {
                 className="w-1.5 h-1.5 rounded-full animate-blink"
                 style={{ background: isOffline ? "var(--amber)" : "var(--teal)" }}
               />
-              {isOffline ? "Airplane Mode" : "Online"}
+              {isOffline ? t("airplaneMode") : t("online")}
             </div>
             <span className="text-xs text-[var(--muted)]">{flight.flightNumber}</span>
           </div>
@@ -67,7 +62,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-4 relative">
             <div>
               <p className="text-3xl font-bold tracking-tight">{flight.origin}</p>
-              <p className="text-xs text-[var(--muted)] mt-0.5">Seoul</p>
+              <p className="text-xs text-[var(--muted)] mt-0.5">{t("citySeoul")}</p>
             </div>
             <div className="flex-1 flex items-center justify-center px-3">
               <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.1)" }} />
@@ -76,7 +71,7 @@ export default function HomePage() {
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold tracking-tight">{flight.destination}</p>
-              <p className="text-xs text-[var(--muted)] mt-0.5">San Francisco</p>
+              <p className="text-xs text-[var(--muted)] mt-0.5">{t("citySanFrancisco")}</p>
             </div>
           </div>
 
@@ -87,17 +82,17 @@ export default function HomePage() {
           >
             <div className="text-center">
               <p className="text-base font-semibold">{remainingH}h {remainingM}m</p>
-              <p className="text-[11px] text-[var(--muted)] mt-0.5">Remaining</p>
+              <p className="text-[11px] text-[var(--muted)] mt-0.5">{t("remaining")}</p>
             </div>
             <div className="w-px" style={{ background: "rgba(255,255,255,0.08)" }} />
             <div className="text-center">
-              <p className="text-base font-semibold text-[var(--teal)]">Synced</p>
-              <p className="text-[11px] text-[var(--muted)] mt-0.5">Content</p>
+              <p className="text-base font-semibold text-[var(--teal)]">{t("synced")}</p>
+              <p className="text-[11px] text-[var(--muted)] mt-0.5">{t("content")}</p>
             </div>
             <div className="w-px" style={{ background: "rgba(255,255,255,0.08)" }} />
             <div className="text-center">
               <p className="text-base font-semibold">3</p>
-              <p className="text-[11px] text-[var(--muted)] mt-0.5">Modules</p>
+              <p className="text-[11px] text-[var(--muted)] mt-0.5">{t("modules")}</p>
             </div>
           </div>
         </div>
@@ -105,15 +100,15 @@ export default function HomePage() {
         {/* Modules */}
         <div className="px-5 mb-2">
           <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--muted)] mb-3">
-            Your Modules
+            {t("yourModules")}
           </p>
           <div className="grid grid-cols-2 gap-3">
             <ModuleCard
               href="/read"
               icon="📖"
               iconBg="icon-bg-purple"
-              title="Read"
-              sub="5 articles saved"
+              title={t("moduleRead")}
+              sub={t("moduleReadSub")}
               progress={68}
               progressColor="var(--purple)"
               badge="68%"
@@ -122,8 +117,8 @@ export default function HomePage() {
               href="/learn"
               icon="🧠"
               iconBg="icon-bg-teal"
-              title="Learn"
-              sub="3 decks ready"
+              title={t("moduleLearn")}
+              sub={t("moduleLearnSub")}
               progress={42}
               progressColor="var(--teal)"
               badge="42%"
@@ -132,8 +127,8 @@ export default function HomePage() {
               href="/journal"
               icon="✍️"
               iconBg="icon-bg-amber"
-              title="Journal"
-              sub="4 entries"
+              title={t("moduleJournal")}
+              sub={t("moduleJournalSub")}
               progress={0}
               progressColor="var(--amber)"
               badge=""
@@ -142,8 +137,8 @@ export default function HomePage() {
               href="/"
               icon="📊"
               iconBg="icon-bg-blue"
-              title="Progress"
-              sub="Flight stats"
+              title={t("moduleProgress")}
+              sub={t("moduleProgressSub")}
               progress={0}
               progressColor="var(--blue)"
               badge=""
@@ -154,7 +149,7 @@ export default function HomePage() {
         {/* Continue section */}
         <div className="px-5 pt-3 pb-6">
           <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--muted)] mb-3">
-            Continue where you left off
+            {t("continueSection")}
           </p>
           <div className="flex flex-col gap-px rounded-2xl overflow-hidden" style={{ background: "var(--glass)" }}>
             <RecentItem
@@ -162,8 +157,8 @@ export default function HomePage() {
               icon="📄"
               iconBg="rgba(124,92,252,0.12)"
               title="The Deep Work Revolution"
-              meta="68% · 4 min left"
-              badge="Read"
+              meta={t("recentMeta1")}
+              badge={t("badgeRead")}
               badgeClass="pill-purple"
             />
             <RecentItem
@@ -171,8 +166,8 @@ export default function HomePage() {
               icon="🃏"
               iconBg="rgba(62,207,178,0.12)"
               title="Korean Business Vocab"
-              meta="12 / 30 cards"
-              badge="Learn"
+              meta={t("recentMeta2")}
+              badge={t("badgeLearn")}
               badgeClass="pill-teal"
             />
             <RecentItem
@@ -180,8 +175,8 @@ export default function HomePage() {
               icon="📝"
               iconBg="rgba(244,185,66,0.12)"
               title="Mid-year reflection"
-              meta="Draft · started today"
-              badge="Journal"
+              meta={t("recentMeta3")}
+              badge={t("badgeJournal")}
               badgeClass="pill-amber"
             />
           </div>
