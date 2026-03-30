@@ -25,9 +25,10 @@ export default function HomePage() {
           <h1 className="text-3xl font-semibold tracking-tight">{t("appTitle")}</h1>
         </div>
 
-        {/* Flight card */}
-        <div
-          className="mx-5 my-4 rounded-[20px] p-5 relative overflow-hidden animate-fade-up"
+        {/* Flight card → 상세 탑승권 */}
+        <Link
+          href="/my-flight"
+          className="mx-5 my-4 block rounded-[20px] p-5 relative overflow-hidden animate-fade-up transition-opacity active:opacity-90 cursor-pointer"
           style={{
             background: "linear-gradient(135deg,#0a1628 0%,#0d1f3c 40%,#0a1628 100%)",
             border: "1px solid rgba(79,142,247,0.2)",
@@ -95,7 +96,7 @@ export default function HomePage() {
               <p className="text-[11px] text-[var(--muted)] mt-0.5">{t("modules")}</p>
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Modules */}
         <div className="px-5 mb-2">

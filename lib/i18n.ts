@@ -98,6 +98,24 @@ const messages = {
     bodyPlaceholder: "35,000피트에서 무슨 생각을 하고 있나요?",
     saveBtn: "저장",
     airplaneModeShort: "비행기 모드",
+
+    boardingTitle: "탑승권",
+    boardingSecNo: "Sec NO",
+    boardingBoardingTime: "탑승시각",
+    boardingDepartureTime: "출발시각",
+    boardingArrivalTime: "도착시각",
+    boardingGate: "탑승구",
+    boardingSeat: "좌석번호",
+    boardingClass: "클래스",
+    boardingTerminal: "터미널",
+    boardingSequence: "탑승 순서",
+    boardingBaggageCarousel: "수하물 수취 카루셀",
+    boardingAddWallet: "Apple Wallet에 추가",
+    boardingDownload: "탑승권 다운로드",
+    boardingReceive: "탑승권 받기",
+    boardingDemoNote: "데모용 탑승권입니다. 실제 탑승 정보가 아닙니다.",
+    boardingBackAria: "홈으로 돌아가기",
+    boardingCloseAria: "닫고 홈으로",
   },
   en: {
     navHome: "Home",
@@ -187,7 +205,8 @@ const messages = {
     good: "Good",
     easy: "Easy",
     sessionComplete: "Session complete!",
-    sessionCompleteBody: "You reviewed {total} cards.\nGreat work at 35,000 feet.",
+    sessionCompleteBody:
+      "You reviewed {total} cards.\nGreat work at 35,000 feet.",
     backToDecks: "Back to decks",
 
     journalNav: "Journal",
@@ -196,12 +215,33 @@ const messages = {
     bodyPlaceholder: "What's on your mind at 35,000 feet?",
     saveBtn: "Save",
     airplaneModeShort: "Airplane Mode",
+
+    boardingTitle: "Boarding pass",
+    boardingSecNo: "Sec NO",
+    boardingBoardingTime: "Boarding",
+    boardingDepartureTime: "Departure",
+    boardingArrivalTime: "Arrival",
+    boardingGate: "Gate",
+    boardingSeat: "Seat",
+    boardingClass: "Class",
+    boardingTerminal: "Terminal",
+    boardingSequence: "Boarding sequence",
+    boardingBaggageCarousel: "Baggage carousel",
+    boardingAddWallet: "Add to Apple Wallet",
+    boardingDownload: "Download boarding pass",
+    boardingReceive: "Get boarding pass",
+    boardingDemoNote: "This is a demo boarding pass only.",
+    boardingBackAria: "Back to home",
+    boardingCloseAria: "Close and go home",
   },
 } as const;
 
 export type MessageKey = keyof typeof messages.en;
 
-function interpolate(template: string, vars: Record<string, string | number>): string {
+function interpolate(
+  template: string,
+  vars: Record<string, string | number>,
+): string {
   let out = template;
   for (const [key, value] of Object.entries(vars)) {
     out = out.replaceAll(`{${key}}`, String(value));
@@ -211,7 +251,10 @@ function interpolate(template: string, vars: Record<string, string | number>): s
 
 export function getT(locale: Locale) {
   const table = messages[locale];
-  return function t(key: MessageKey, vars?: Record<string, string | number>): string {
+  return function t(
+    key: MessageKey,
+    vars?: Record<string, string | number>,
+  ): string {
     const raw = table[key];
     if (!vars) return raw;
     return interpolate(raw, vars);

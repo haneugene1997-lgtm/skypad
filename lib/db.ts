@@ -48,6 +48,59 @@ export interface JournalEntry {
   isDraft: boolean;
 }
 
+/** Fictional demo boarding pass for offline display on /my-flight */
+export interface BoardingPass {
+  id: "current";
+  passengerLine: string;
+  flightDateKo: string;
+  flightDateEn: string;
+  flightNumber: string;
+  originCode: string;
+  originCityKo: string;
+  originCityEn: string;
+  destCode: string;
+  destCityKo: string;
+  destCityEn: string;
+  boardingTime: string;
+  departureTime: string;
+  arrivalKo: string;
+  arrivalEn: string;
+  gate: string;
+  seat: string;
+  cabinKo: string;
+  cabinEn: string;
+  terminal: string;
+  zone: string;
+  baggageCarousel: string;
+  secNo: string;
+}
+
+export const DEFAULT_BOARDING_PASS: BoardingPass = {
+  id: "current",
+  passengerLine: "HAN YUJIN / GENERAL",
+  flightDateKo: "2026년 01월 15일",
+  flightDateEn: "January 15, 2026",
+  flightNumber: "KE 023",
+  originCode: "ICN",
+  originCityKo: "서울/인천",
+  originCityEn: "Seoul/Incheon",
+  destCode: "SFO",
+  destCityKo: "샌프란시스코",
+  destCityEn: "San Francisco",
+  boardingTime: "17:55",
+  departureTime: "18:35",
+  arrivalKo: "다음날 05:15 (현지 시각)",
+  arrivalEn: "Next day 05:15 (local)",
+  gate: "241",
+  seat: "21A",
+  cabinKo: "일반석",
+  cabinEn: "Economy",
+  terminal: "2",
+  zone: "ZONE 3",
+  baggageCarousel: "14",
+  secNo: "088",
+};
+
 // ── Schema ───────────────────────────────────────────
 
 interface SkyPadDB extends DBSchema {
@@ -70,6 +123,10 @@ interface SkyPadDB extends DBSchema {
     value: JournalEntry;
     indexes: { "by-updated": number };
   };
+  boarding: {
+    key: string;
+    value: BoardingPass;
+  };
 }
 
 // ── Singleton connection ─────────────────────────────
@@ -79,29 +136,50 @@ let _db: IDBPDatabase<SkyPadDB> | null = null;
 export async function getDB(): Promise<IDBPDatabase<SkyPadDB>> {
   if (_db) return _db;
 
-  _db = await openDB<SkyPadDB>("skypad-db", 1, {
-    upgrade(db) {
-      // Articles
-      const articleStore = db.createObjectStore("articles", { keyPath: "id" });
-      articleStore.createIndex("by-saved", "savedAt");
-
-      // Decks
-      db.createObjectStore("decks", { keyPath: "id" });
-
-      // Flashcards
-      const cardStore = db.createObjectStore("flashcards", { keyPath: "id" });
-      cardStore.createIndex("by-deck", "deckId");
-      cardStore.createIndex("by-due", "dueAt");
-
-      // Journal
-      const journalStore = db.createObjectStore("journal", { keyPath: "id" });
-      journalStore.createIndex("by-updated", "updatedAt");
+  _db = await openDB<SkyPadDB>("skypad-db", 2, {
+    upgrade(db, oldVersion) {
+      if (oldVersion < 1) {
+        const articleStore = db.createObjectStore("articles", { keyPath: "id" });
+        articleStore.createIndex("by-saved", "savedAt");
+        db.createObjectStore("decks", { keyPath: "id" });
+        const cardStore = db.createObjectStore("flashcards", { keyPath: "id" });
+        cardStore.createIndex("by-deck", "deckId");
+        cardStore.createIndex("by-due", "dueAt");
+        const journalStore = db.createObjectStore("journal", { keyPath: "id" });
+        journalStore.createIndex("by-updated", "updatedAt");
+      }
+      if (oldVersion < 2) {
+        if (!db.objectStoreNames.contains("boarding")) {
+          db.createObjectStore("boarding", { keyPath: "id" });
+        }
+      }
     },
   });
 
   await seedIfEmptyWithDb(_db);
+  await ensureBoardingPass(_db);
 
   return _db;
+}
+
+async function ensureBoardingPass(db: IDBPDatabase<SkyPadDB>): Promise<void> {
+  const row = await db.get("boarding", "current");
+  if (!row) {
+    await db.put("boarding", DEFAULT_BOARDING_PASS);
+  }
+}
+
+export async function getBoardingPass(): Promise<BoardingPass> {
+  const db = await getDB();
+  const row = await db.get("boarding", "current");
+  if (row) return row;
+  await db.put("boarding", DEFAULT_BOARDING_PASS);
+  return DEFAULT_BOARDING_PASS;
+}
+
+export async function saveBoardingPass(pass: BoardingPass): Promise<void> {
+  const db = await getDB();
+  await db.put("boarding", { ...pass, id: "current" });
 }
 
 // ── Articles ─────────────────────────────────────────
